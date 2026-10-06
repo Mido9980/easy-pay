@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0a0a14">
+<title>EASY PAY — استلم فلوسك بأمان</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💳</text></svg>">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; font-family:'Segoe UI', Tahoma, Arial, sans-serif; }
+body { min-height:100vh; background:#0a0a14; color:#e8e8f0; display:flex; align-items:center; justify-content:center; padding:20px;
+  background-image:radial-gradient(circle at 20% 10%, #1a1a3a 0%, transparent 50%), radial-gradient(circle at 80% 90%, #0d2b2b 0%, transparent 50%); }
+.wrap { width:100%; max-width:420px; }
+.brand { text-align:center; margin-bottom:22px; position:relative; }
+.brand::before { content:'EASY CODE'; position:absolute; top:-6px; right:50%; transform:translateX(50%); font-size:9px; letter-spacing:4px; color:#4a4a6a; opacity:.5; }
+.logo { font-size:44px; margin-bottom:4px; }
+h1 { font-size:26px; font-weight:800; background:linear-gradient(90deg,#7c6cff,#00d9c0); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.tag { color:#9a9ab8; font-size:13px; margin-top:4px; }
+.card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09); border-radius:20px; padding:22px; backdrop-filter:blur(10px); }
+.f { margin-bottom:14px; }
+.f label { display:block; font-size:13px; color:#9a9ab8; margin-bottom:6px; }
+.f input, .f textarea { width:100%; background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:13px 15px; color:#fff; font-size:16px; outline:none; transition:border .2s; }
+.f input:focus, .f textarea:focus { border-color:#7c6cff; }
+.f textarea { resize:none; height:70px; }
+.row { display:flex; gap:10px; }
+.row .f { flex:1; }
+.btn { width:100%; background:linear-gradient(90deg,#7c6cff,#00d9c0); border:none; border-radius:14px; padding:15px; color:#fff; font-size:17px; font-weight:700; cursor:pointer; transition:transform .1s, opacity .2s; }
+.btn:active { transform:scale(.98); }
+.btn:disabled { opacity:.5; }
+.wallet { margin-top:18px; background:rgba(0,217,192,.08); border:1px solid rgba(0,217,192,.25); border-radius:14px; padding:14px; text-align:center; }
+.wallet .wt { font-size:12px; color:#00d9c0; margin-bottom:4px; }
+.wallet .wn { font-size:22px; font-weight:800; letter-spacing:1px; direction:ltr; }
+.wallet .cp { margin-top:8px; background:rgba(0,217,192,.15); border:none; border-radius:9px; color:#00d9c0; padding:7px 18px; font-size:13px; cursor:pointer; }
+.ok { display:none; text-align:center; padding:26px 0 10px; }
+.ok .em { font-size:48px; }
+.ok h2 { font-size:20px; margin:10px 0 6px; color:#00d9c0; }
+.ok p { color:#9a9ab8; font-size:14px; line-height:1.7; }
+.err { display:none; background:rgba(255,80,80,.12); border:1px solid rgba(255,80,80,.3); color:#ff9a9a; border-radius:10px; padding:10px 14px; font-size:13px; margin-bottom:12px; text-align:center; }
+.foot { text-align:center; margin-top:18px; font-size:11px; color:#55556e; letter-spacing:1px; }
+.hint { text-align:center; color:#77779a; font-size:12px; margin-top:14px; line-height:1.8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="logo">💳</div>
+    <h1>EASY PAY</h1>
+    <div class="tag">العميل بيبعت إشعار فوري لما يكون عاوز يدفع</div>
+  </div>
+  <div class="card">
+    <div class="err" id="err"></div>
+    <form id="form" onsubmit="return send(event)">
+      <div class="f"><label>اسمك</label><input id="name" placeholder="مثال: أحمد محمود" required></div>
+      <div class="row">
+        <div class="f"><label>رقم موبايلك</label><input id="phone" type="tel" placeholder="01xxxxxxxxx" required></div>
+        <div class="f"><label>المبلغ (جنيه)</label><input id="amount" type="number" min="1" placeholder="مثال: 50" required></div>
+      </div>
+      <div class="f"><label>بيدفع في إيه؟ (اختياري)</label><textarea id="purpose" placeholder="مثال: اشتراك سينما AI في EASY VIDEO"></textarea></div>
+      <button class="btn" id="go" type="submit">🔔 أبّه صاحب الحساب</button>
+    </form>
+    <div class="ok" id="ok">
+      <div class="em">✅</div>
+      <h2>وصل الإشعار!</h2>
+      <p>صاحب الحساب هيتواصل معاك في ثواني.<br>اكمل التحويل على المحفظة تحت وأبعت الإيصال.</p>
+    </div>
+    <div class="wallet" id="wallet" style="display:none">
+      <div class="wt" id="wt"></div>
+      <div class="wn" id="wn"></div>
+      <button class="cp" onclick="copyN()">📋 انسخ الرقم</button>
+    </div>
+    <div class="hint">بعد ما تحوّل، ابعت صورة الإيصال في نفس المحادثة اللي اتفقتوا عليها.</div>
+  </div>
+  <div class="foot">EASY CODE — APPS MADE EASY</div>
+</div>
+<script>
+const API = 'https://shark-vision-labs.base44.app/functions/payPublic';
+const $ = id => document.getElementById(id);
+async function boot() {
+  try {
+    const c = await (await fetch(API)).json();
+    if (c.initialized) {
+      $('wt').textContent = 'حوّل على ' + (c.wallet_type || 'المحفظة');
+      $('wn').textContent = c.wallet_number;
+      $('wallet').style.display = 'block';
+    }
+  } catch(e) {}
+}
+function copyN() {
+  navigator.clipboard.writeText($('wn').textContent).then(() => { $('go').textContent = 'تم النسخ ✓'; });
+}
+async function send(ev) {
+  ev.preventDefault();
+  $('err').style.display = 'none';
+  const btn = $('go'); btn.disabled = true; btn.textContent = 'جاري الإرسال...';
+  try {
+    const r = await (await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'notify', name: $('name').value.trim(), phone: $('phone').value.trim(),
+        amount: Number($('amount').value), purpose: $('purpose').value.trim() }) })).json();
+    if (!r.ok) { $('err').textContent = r.error; $('err').style.display = 'block'; btn.disabled = false; btn.textContent = '🔔 أبّه صاحب الحساب'; return; }
+    $('form').style.display = 'none'; $('ok').style.display = 'block';
+  } catch(e) {
+    $('err').textContent = 'في مشكلة في الاتصال، جرّب تاني'; $('err').style.display = 'block';
+    btn.disabled = false; btn.textContent = '🔔 أبّه صاحب الحساب';
+  }
+  return false;
+}
+boot();
+</script>
+</body>
+</html>
