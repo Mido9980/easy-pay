@@ -31,6 +31,9 @@ h1 { font-size:26px; font-weight:800; background:linear-gradient(90deg,#7c6cff,#
 .wallet .wt { font-size:12px; color:#00d9c0; margin-bottom:4px; }
 .wallet .wn { font-size:22px; font-weight:800; letter-spacing:1px; direction:ltr; }
 .wallet .cp { margin-top:8px; background:rgba(0,217,192,.15); border:none; border-radius:9px; color:#00d9c0; padding:7px 18px; font-size:13px; cursor:pointer; }
+.wallet .cp { margin-left:6px; }
+.wallet .rw { margin-top:8px; background:rgba(0,217,192,.15); border:none; border-radius:9px; color:#00d9c0; padding:7px 18px; font-size:13px; cursor:pointer; }
+.wallet .btns { margin-top:8px; }
 .gws { display:none; margin-top:16px; flex-direction:column; gap:10px; }
 .online { display:block; text-align:center; background:linear-gradient(90deg,#7c6cff,#00d9c0); border:none; border-radius:14px; padding:15px; color:#fff; font-size:16px; font-weight:700; cursor:pointer; text-decoration:none; }
 .online:active { transform:scale(.98); }
@@ -73,7 +76,10 @@ h1 { font-size:26px; font-weight:800; background:linear-gradient(90deg,#7c6cff,#
     <div class="wallet" id="wallet" style="display:none">
       <div class="wt" id="wt"></div>
       <div class="wn" id="wn"></div>
-      <button class="cp" onclick="copyN()">📋 انسخ الرقم</button>
+      <div class="btns">
+        <button class="rw" id="rv" onclick="revealN()">👁 اعرض الرقم</button>
+        <button class="cp" onclick="copyN()">📋 انسخ الرقم</button>
+      </div>
     </div>
     <div class="hint">بعد ما تحوّل، ابعت صورة الإيصال في نفس المحادثة اللي اتفقتوا عليها.</div>
   </div>
@@ -88,7 +94,7 @@ async function boot(retry) {
     if (!c.initialized && !(c.gateways || []).length && !retry) { setTimeout(() => boot(true), 2500); return; }
     if (c.initialized) {
       $('wt').textContent = 'أو حوّل على ' + (c.wallet_type || 'المحفظة');
-      $('wn').textContent = c.wallet_number;
+      $('wn').textContent = c.wallet_masked || '•••';
       $('wallet').style.display = 'block';
     }
     const icons = { paymob: '💳', stripe: '🟣', paypal: '🅿️', wise: '🌍', instapay: '⚡', custom: '🔗' };
@@ -104,8 +110,23 @@ async function boot(retry) {
     if ((c.gateways || []).length) { $('gws').style.display = 'flex'; $('dvd').style.display = 'flex'; }
   } catch(e) {}
 }
-function copyN() {
-  navigator.clipboard.writeText($('wn').textContent).then(() => { $('go').textContent = 'تم النسخ ✓'; });
+async function revealN() {
+  const b = $('rv'); b.textContent = '...'; b.disabled = true;
+  try {
+    const r = await (await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'reveal_wallet' }) })).json();
+    if (r.ok) { $('wn').textContent = r.wallet_number; b.textContent = 'تم العرض ✓'; }
+    else { b.textContent = 'حصل خطأ'; b.disabled = false; }
+  } catch(e) { b.textContent = 'حصل خطأ'; b.disabled = false; }
+}
+async function copyN() {
+  let num = $('wn').textContent;
+  if (num.includes('•')) {
+    try {
+      const r = await (await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'reveal_wallet' }) })).json();
+      if (r.ok) { num = r.wallet_number; $('wn').textContent = num; $('rv').textContent = 'تم العرض ✓'; }
+    } catch(e) {}
+  }
+  navigator.clipboard.writeText(num).then(() => { $('go').textContent = 'تم النسخ ✓'; });
 }
 async function send(ev) {
   ev.preventDefault();
